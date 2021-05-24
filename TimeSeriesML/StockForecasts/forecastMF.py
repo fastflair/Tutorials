@@ -47,9 +47,9 @@ def predict_gap(model, data, df2, indexVals):
     for X in range(LOOKUP_STEP):
         # retrieve the last sequence from data
         last_sequence = data["last_sequence"][-N_STEPS-X:]
-        last_sequence = last_sequence[:N_STEPS]
         # expand dimension
         last_sequence = np.expand_dims(last_sequence, axis=0)
+        last_sequence = last_sequence[:N_STEPS]
         # get the prediction (scaled from 0 to 1)
         prediction = model.predict(last_sequence)
         # get the price (by inverting the scaling)

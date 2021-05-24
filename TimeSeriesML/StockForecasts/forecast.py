@@ -1,14 +1,23 @@
 from parameters import *
 import sys
 from stock_prediction import pd
+import contextlib
 
 pd.options.mode.chained_assignment = None  # default='warn'
+DAYS_BEFORE_LOOKUP = 0
+HALF_LOOKUP_STEP = 0
+HALF_LOOKUP_STEP_PRICE = 0
+QUART_LOOKUP_STEP = 0
+QUART_LOOKUP_STEP_PRICE = 0
+
 
 # date now
 date_now = time.strftime("%Y-%m")
 if len(sys.argv) > 2:
     TICKER = sys.argv[1]
     LOOKUP_STEP = int(sys.argv[2])
+    HALF_LOOKUP_STEP = int(LOOKUP_STEP/2)
+    QUART_LOOKUP_STEP = int(HALF_LOOKUP_STEP/2)
     model_name = f"{date_now}_{TICKER}-{shuffle_str}-{scale_str}-{split_by_date_str}-{LOSS}-{OPTIMIZER}-{CELL.__name__}-seq-{N_STEPS}-step-{LOOKUP_STEP}-layers-{N_LAYERS}-units-{UNITS}-activation-{ACTIVATION}"
     if BIDIRECTIONAL:
         model_name += "-b"
@@ -42,8 +51,8 @@ def predict_gap(model, data, df2, indexVals):
     for X in range(LOOKUP_STEP):
         # retrieve the last sequence from data
         last_sequence = data["last_sequence"][-N_STEPS-X:]
-        last_sequence = last_sequence[:N_STEPS]
         # expand dimension
+        last_sequence = last_sequence[:N_STEPS]
         last_sequence = np.expand_dims(last_sequence, axis=0)
         # get the prediction (scaled from 0 to 1)
         prediction = model.predict(last_sequence)
@@ -54,7 +63,11 @@ def predict_gap(model, data, df2, indexVals):
             predicted_price = prediction[0][0]   
 
         df2.loc[indexVals[-X],'forecast'] = predicted_price
-    return df2
+        if X == HALF_LOOKUP_STEP:
+            HALF_LOOKUP_STEP_PRICE = predicted_price
+        if X == QUART_LOOKUP_STEP:
+            QUART_LOOKUP_STEP_PRICE = predicted_price
+    return df2, HALF_LOOKUP_STEP_PRICE, QUART_LOOKUP_STEP_PRICE
 
 def plot_graph2(test_df, df2):
     """
@@ -73,6 +86,8 @@ def plot_graph2(test_df, df2):
     if not os.path.isdir(forecast_folder):
         os.mkdir(forecast_folder)
     filename = os.path.join(forecast_folder, TICKER.lower() + "_" + f"{LOOKUP_STEP}" + "_forecast.png")
+    with contextlib.suppress(FileNotFoundError):
+        os.remove(filename)
     plt.savefig(filename)
     #plt.show()       
    
@@ -147,10 +162,12 @@ df2['forecast'] = 0
 indexVals = []
 for index in df2.index:
     indexVals.append(index)    
-future_prices = predict_gap(model, data, df2, indexVals)
+future_prices, HALF_LOOKUP_STEP_PRICE, QUART_LOOKUP_STEP_PRICE = predict_gap(model, data, df2, indexVals)
 
 # plot true/pred prices graph
 plot_graph2(final_df, df2)
     
 future_price = predict(model, data)
 print(f"Future $ price after {LOOKUP_STEP} days is {future_price:.2f}")
+print(f"Future $ price after {HALF_LOOKUP_STEP} days is {HALF_LOOKUP_STEP_PRICE:.2f}")
+print(f"Future $ price after {QUART_LOOKUP_STEP} days is {QUART_LOOKUP_STEP_PRICE:.2f}")
