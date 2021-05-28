@@ -168,6 +168,11 @@ future_prices, HALF_LOOKUP_STEP_PRICE, QUART_LOOKUP_STEP_PRICE = predict_gap(mod
 plot_graph2(final_df, df2)
     
 future_price = predict(model, data)
+
+#update prices
+future_price = df2['forecast'][df2.index[-1]]
+HALF_LOOKUP_STEP_PRICE = df2['forecast'][df2.index[-HALF_LOOKUP_STEP]]
+QUART_LOOKUP_STEP_PRICE = df2['forecast'][df2.index[-LOOKUP_STEP+1]]
 print(f"Future $ price after {LOOKUP_STEP} days is {future_price:.2f}")
 print(f"Future $ price after {HALF_LOOKUP_STEP} days is {HALF_LOOKUP_STEP_PRICE:.2f}")
-print(f"Future $ price after {QUART_LOOKUP_STEP} days is {QUART_LOOKUP_STEP_PRICE:.2f}")
+print(f"Future $ price after 1 day is {QUART_LOOKUP_STEP_PRICE:.2f}")
