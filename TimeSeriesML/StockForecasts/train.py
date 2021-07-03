@@ -13,6 +13,8 @@ if len(sys.argv) > 2:
     if BIDIRECTIONAL:
         model_name += "-b"
     ticker_data_filename = os.path.join("data", f"{TICKER}_{date_now}.csv")
+if len(sys.argv) > 3:
+    simdate = sys.argv[3]
 
 if not path.exists(os.path.join("results", model_name) + ".h5"):
     from stock_prediction import create_model, load_data
@@ -33,7 +35,7 @@ if not path.exists(os.path.join("results", model_name) + ".h5"):
         os.mkdir("data")
 
     # load the data
-    data = load_data(TICKER, n_steps=N_STEPS, scale=SCALE, split_by_date=SPLIT_BY_DATE, shuffle=SHUFFLE, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE, feature_columns=FEATURE_COLUMNS, ma_periods=MA_PERIODS)
+    data = load_data(TICKER, n_steps=N_STEPS, scale=SCALE, split_by_date=SPLIT_BY_DATE, shuffle=SHUFFLE, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE, feature_columns=FEATURE_COLUMNS, ma_periods=MA_PERIODS, endDate=simdate)
     
     # save the dataframe
     data["df"].to_csv(ticker_data_filename)

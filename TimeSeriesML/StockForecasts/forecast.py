@@ -9,6 +9,7 @@ HALF_LOOKUP_STEP = 0
 HALF_LOOKUP_STEP_PRICE = 0
 QUART_LOOKUP_STEP = 0
 QUART_LOOKUP_STEP_PRICE = 0
+simdate = "12/31/2070"
 
 
 # date now
@@ -21,6 +22,8 @@ if len(sys.argv) > 2:
     model_name = f"{date_now}_{TICKER}-{shuffle_str}-{scale_str}-{split_by_date_str}-{LOSS}-{OPTIMIZER}-{CELL.__name__}-seq-{N_STEPS}-step-{LOOKUP_STEP}-layers-{N_LAYERS}-units-{UNITS}-activation-{ACTIVATION}"
     if BIDIRECTIONAL:
         model_name += "-b"
+if len(sys.argv) > 3:
+    simdate = sys.argv[3]
         
 import os
 from os import path
@@ -137,7 +140,7 @@ def get_final_df(model, data):
 # load the data
 data = load_data(TICKER, N_STEPS, scale=SCALE, split_by_date=SPLIT_BY_DATE, 
                 shuffle=SHUFFLE, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE, 
-                feature_columns=FEATURE_COLUMNS, ma_periods=MA_PERIODS)
+                feature_columns=FEATURE_COLUMNS, ma_periods=MA_PERIODS, endDate=simdate)
 
 # construct the model
 model = create_model(N_STEPS, len(FEATURE_COLUMNS), loss=LOSS, units=UNITS, cell=CELL, n_layers=N_LAYERS, dropout=DROPOUT, optimizer=OPTIMIZER, bidirectional=BIDIRECTIONAL, activation=ACTIVATION)

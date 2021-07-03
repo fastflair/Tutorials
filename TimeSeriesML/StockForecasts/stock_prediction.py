@@ -67,7 +67,7 @@ def get_rsi_timeseries(prices, n=1):
     return rsi_series
 
 def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split_by_date=True,
-                test_size=0.2, feature_columns=['adjclose', 'volume'], ma_periods=[5, 20]):
+                test_size=0.2, feature_columns=['adjclose', 'volume'], ma_periods=[5, 20], endDate="12/31/2070"):
     """
     Loads data from Yahoo Finance source, as well as scaling, shuffling, normalizing and splitting.
     Params:
@@ -82,7 +82,7 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
     # see if ticker is already a loaded stock from yahoo finance
     if isinstance(TICKER, str):
         # load it from yahoo_fin library
-        df = si.get_data(TICKER, start_date = "01/01/2016")
+        df = si.get_data(TICKER, start_date = "01/01/2016", end_date=endDate)
     elif isinstance(TICKER, pd.DataFrame):
         # already loaded, use it directly
         df = TICKER
@@ -128,19 +128,21 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
     df['dvolume'] = df['volume'].diff().fillna(0).astype(float)
     df['momentum'] = (df['dprice'] * df['dvolume'])
     
-    # On Balance Volume Calcs
+     # On Balance Volume * Price Calcs
     for i in range(1, len(df.adjclose)):
         if df.adjclose[i] > df.adjclose[i-1]: #If the closing price is above the prior close price 
-            OBV.append(OBV[-1] + df.volume[i]) #then: Current OBV = Previous OBV + Current Volume
+            OBV.append(OBV[-1] + (df.volume[i] * df.adjclose[i])) #then: Current OBV = Previous OBV + Current Volume * Price
         elif df.adjclose[i] < df.adjclose[i-1]:
-            OBV.append( OBV[-1] - df.volume[i])
+            OBV.append( OBV[-1] - (df.volume[i] * df.adjclose[i]))
         else:
             OBV.append(OBV[-1])
     #Store the OBV and OBV EMA into new columns
     df['OBV'] = OBV        
     df['OBV_SMA50'] = df['OBV'].rolling(window=50,min_periods=1).mean()
-    df['dOBV50'] = df['OBV']-df['OBV_SMA50'].fillna(0).astype(float)
-    df['dcumSumOBV50'] = df['dOBV50'].cumsum().astype(float)
+    df['OBV_SMA3'] = df['OBV'].rolling(window=3,min_periods=1).mean()
+    df['dOBV50'] = df['OBV_SMA3']-df['OBV_SMA50'].fillna(0).astype(float)
+    df['cumSumOBV50'] = df['dOBV50'].cumsum().astype(float)
+    df['dcumSumOBV50'] = df['cumSumOBV50'].diff().fillna(0).astype(float)
 
     # add date as a column
     if "date" not in df.columns:
