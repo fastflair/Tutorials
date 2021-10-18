@@ -8,13 +8,17 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 # date now
 date_now = time.strftime("%Y-%m")
+simdate = time.strftime("%m/%d/%Y")  
+
 if len(sys.argv) > 2:
     TICKER = sys.argv[1]
     LOOKUP_STEP = int(sys.argv[2])
     model_name = f"{date_now}_{TICKER}-{shuffle_str}-{scale_str}-{split_by_date_str}-{LOSS}-{OPTIMIZER}-{CELL.__name__}-seq-{N_STEPS}-step-{LOOKUP_STEP}-layers-{N_LAYERS}-units-{UNITS}-activation-{ACTIVATION}"
     if BIDIRECTIONAL:
         model_name += "-b"
-
+if len(sys.argv) > 3:
+    simdate = sys.argv[3]
+    
 import os
 from os import path
 if not path.exists(os.path.join("results", model_name) + ".h5"):
@@ -79,9 +83,9 @@ def predict(model, data):
         predicted_price = prediction[0][0]
     return predicted_price
 
-def predict_gap(model, data, df2, indexVals):
+def predict_prices(model, data, df2, indexVals):
     predicted_prices = []
-    for X in range(LOOKUP_STEP):
+    for X in range(LOOKUP_STEP*12):
         # retrieve the last sequence from data
         last_sequence = data["last_sequence"][-N_STEPS-X:]
         last_sequence = last_sequence[:N_STEPS]
@@ -96,7 +100,12 @@ def predict_gap(model, data, df2, indexVals):
             predicted_price = prediction[0][0]   
 
         df2.loc[indexVals[-X],'forecast'] = predicted_price
-    return df2
+    # add rows for future forecast
+    last_date = df2.index[-1]
+    new_index = pd.date_range(last_date, periods=20, freq='D')
+    df3 = pd.DataFrame(index=new_index, columns=df2.columns)
+    df3 = df3.fillna(0)
+    return df2.append(df3)
     
 def plot_graph(test_df):
     """
@@ -119,16 +128,15 @@ def plot_graph(test_df):
     plt.savefig(filename)
     plt.show()
     
-def plot_graph2(test_df, df2):
+def plot_graph2(future_prices):
     """
     This function plots true close price along with predicted close price
     with blue and red colors respectively
     """
     plt.figure(figsize=(18,8))
     plt.title(TICKER+" Stock Price Forecast "+ f"{LOOKUP_STEP}" +" days out", fontsize=16)
-    plt.plot(test_df[f'true_adjclose_{LOOKUP_STEP}'].tail(N_STEPS), c='b')
-    plt.plot(test_df[f'adjclose_{LOOKUP_STEP}'].tail(N_STEPS), c='r')
-    plt.plot(df2['forecast'].tail(LOOKUP_STEP-1), c='r')
+    plt.plot(future_prices[f'adjclose'][N_STEPS+1:-LOOKUP_STEP], c='b')
+    plt.plot(future_prices[f'forecast'][N_STEPS-LOOKUP_STEP+1:].shift(LOOKUP_STEP), c='r')
     plt.xlabel("Days")
     plt.ylabel("Price")
     plt.legend(["Actual Price", "Predicted Price"])
@@ -140,7 +148,7 @@ def plot_graph2(test_df, df2):
     plt.show()    
     
 # load the data
-data = load_data(TICKER, N_STEPS, scale=SCALE, split_by_date=SPLIT_BY_DATE, shuffle=SHUFFLE, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE, feature_columns=FEATURE_COLUMNS, ma_periods=MA_PERIODS)
+data = load_data(TICKER, N_STEPS, scale=SCALE, split_by_date=SPLIT_BY_DATE, shuffle=SHUFFLE, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE, feature_columns=FEATURE_COLUMNS, ma_periods=MA_PERIODS, endDate=simdate)
 
 # construct the model
 model = create_model(N_STEPS, len(FEATURE_COLUMNS), loss=LOSS, units=UNITS, cell=CELL, n_layers=N_LAYERS, dropout=DROPOUT, optimizer=OPTIMIZER, bidirectional=BIDIRECTIONAL)
@@ -180,16 +188,16 @@ print("Total sell profit:", total_sell_profit)
 print("Total profit:", total_profit)
 print("Profit per trade:", profit_per_trade)
 
-df2 = data['df'].tail(LOOKUP_STEP)
+df2 = data['df'].tail(LOOKUP_STEP*12)
 df2['forecast'] = 0
 
 indexVals = []
 for index in df2.index:
     indexVals.append(index)    
-future_prices = predict_gap(model, data, df2, indexVals)
+future_prices = predict_prices(model, data, df2, indexVals)
 
 # plot true/pred prices graph
-plot_graph2(final_df, df2)
+plot_graph2(future_prices)
 
 # print(final_df.tail(10))
 # save the final dataframe to csv-results folder

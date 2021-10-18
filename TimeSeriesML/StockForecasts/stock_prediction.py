@@ -12,7 +12,12 @@ from collections import deque
 import numpy as np
 import pandas as pd
 import random
-
+import pypyodbc
+cnxn = pypyodbc.connect("Driver={SQL Server Native Client 11.0};"
+                        "Server=127.0.0.1;"
+                        "Database=db;"
+                        "uid=uid;pwd=pwd")
+                        
 # set seed, so we can get the same results after rerunning several times
 np.random.seed(314)
 tf.random.set_seed(314)
@@ -82,7 +87,16 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
     # see if ticker is already a loaded stock from yahoo finance
     if isinstance(TICKER, str):
         # load it from yahoo_fin library
-        df = si.get_data(TICKER, start_date = "01/01/2016", end_date=endDate)
+        # df = si.get_data(TICKER, start_date = "01/01/2019", end_date=endDate)
+        query = "SELECT [date_time] as date_time, round([price_open]/100.0, 2) as [open], round([price_high]/100.0, 2) as [high],  round([price_low]/100.0, 2) as [low],  round([price_close]/100.0, 2) as [close],  round([adjClose]/100.0, 2) as [adjclose], [volume], '"+TICKER+"' as ticker  FROM [StockTitan].[st].[daily] where stock_id = (select top(1) stock_id from [st].[stock] where symbol = '"+TICKER+"') and date_time >= '01/01/2019' and date_time <= '"+endDate+"' and volume > 0 and price_close > 0 order by date_time"
+        df = pd.read_sql_query(query, cnxn)
+        df = df.set_index('date_time')
+        df['adjclose'].iloc[-1] = df['close'].iloc[-1]
+        df['adjclose'].iloc[-2] = df['close'].iloc[-2]
+        df['adjclose'].iloc[-3] = df['close'].iloc[-3]
+        df['adjclose'].iloc[-4] = df['close'].iloc[-4]
+        df['adjclose'].iloc[-5] = df['close'].iloc[-5]
+
     elif isinstance(TICKER, pd.DataFrame):
         # already loaded, use it directly
         df = TICKER
@@ -112,12 +126,15 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
         #df['sd'+str(n)] = df['sd'+str(n)].fillna(0)
         #df['upper_band'+str(n)] = (df['sma'+str(n)] + (df['sd'+str(n)]*2)) - df['adjclose']
         #df['lower_band'+str(n)] = df['adjclose'] - (df['sma'+str(n)] - (df['sd'+str(n)]*2))
-    df['26ema'] = df['adjclose'].ewm(span=26).mean()
-    df['12ema'] =  df['adjclose'].ewm(span=12).mean()
-    df['9ema'] =  df['adjclose'].ewm(span=9).mean()
-    df['MACD'] = (df['12ema']-df['26ema'])
+    df['7ema'] = df['adjclose'].ewm(span=7).mean()
+    df['26ema'] =  df['adjclose'].ewm(span=25).mean()
+    df['65ema'] =  df['adjclose'].ewm(span=65).mean()
+    df['MACD'] = (df['7ema'] - df['26ema'])
+    df['MACDS'] = df['MACD'].ewm(span=9).mean()
+    df['MACDD'] = df['MACD'] - df['MACDS']
     
     # Create Bollinger Bands
+    df['sma20'] = df['adjclose'].rolling(window=20,min_periods=1).mean()
     df['20sd'] = df['adjclose'].rolling(window=20,min_periods=1).std()
     df['20sd'] = df['20sd'].fillna(0)
     df['upper_band'] = (df['sma20'] + (df['20sd']*2)) - df['adjclose']
@@ -138,11 +155,33 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
             OBV.append(OBV[-1])
     #Store the OBV and OBV EMA into new columns
     df['OBV'] = OBV        
-    df['OBV_SMA50'] = df['OBV'].rolling(window=50,min_periods=1).mean()
-    df['OBV_SMA3'] = df['OBV'].rolling(window=3,min_periods=1).mean()
-    df['dOBV50'] = df['OBV_SMA3']-df['OBV_SMA50'].fillna(0).astype(float)
-    df['cumSumOBV50'] = df['dOBV50'].cumsum().astype(float)
-    df['dcumSumOBV50'] = df['cumSumOBV50'].diff().fillna(0).astype(float)
+    df['OBVFast'] = df['OBV'].rolling(window=7,min_periods=1).mean()
+    df['OBVSlow'] = df['OBV'].rolling(window=65,min_periods=1).mean()
+    df['dOBV'] = df['OBVFast'] - df['OBVSlow'].fillna(0).astype(float)
+    df['OBVX'] = df['OBV'].rolling(window=3,min_periods=1).mean()
+    df['OBVY'] = df['OBV'].rolling(window=22,min_periods=1).mean()
+    df['SMAVol20'] = df['volume'].rolling(window=20,min_periods=1).mean()
+    df['SMAFast'] = df['adjclose'].rolling(window=7,min_periods=1).mean()
+    df['SMAMed'] = df['adjclose'].rolling(window=65,min_periods=1).mean()
+    df['SMASlow'] = df['adjclose'].rolling(window=126,min_periods=1).mean()
+    df['dSMAFS'] = df['SMAFast'] - df['SMASlow'].fillna(0).astype(float)
+    df['cumSumOBVFastSlow'] = df['dOBV'].cumsum().astype(float)
+    df['dCumSumOBVFastSlow'] = df['cumSumOBVFastSlow'].diff().fillna(0).astype(float)
+    df['perc1c2']=df['adjclose'].shift(1) / df['adjclose'].shift(2)
+    df['dCO']=df['close'] - df['open']
+    df['percc1']=df['adjclose']/df['adjclose'].shift(1).fillna(0).astype(float)
+    df['YTDPer']=df['adjclose'] /df['adjclose'].shift(252).fillna(0).astype(float)
+    df['ROC5']=df['adjclose'] /df['adjclose'].shift(5).fillna(0).astype(float)
+    df['ROC10']=df['adjclose'] /df['adjclose'].shift(10).fillna(0).astype(float)
+    df['ROC25']=df['adjclose'] /df['adjclose'].shift(25).fillna(0).astype(float)
+    df['dSFastSMed'] = df['SMAFast'] - df['SMAMed'].fillna(0).astype(float)
+    #df['MDT']=df['adjclose'] /df['SMASlow'] 
+    #df['MDT25']=df['MDT'].shift(25)
+    df['NC'] = abs(df['adjclose'] - df['adjclose'].shift(1));
+    df['LIN'] = abs(((df['adjclose'].shift(2) - df['adjclose']) / 2.0) / (df['adjclose'].shift(1) - df['adjclose']))
+    df['LIN25'] = df['LIN'].rolling(window=25,min_periods=1).mean()
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df = df.fillna(0)
 
     # add date as a column
     if "date" not in df.columns:
@@ -174,7 +213,7 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
 
     # last `lookup_step` columns contains NaN in future column
     # get them before droping NaNs
-    last_sequence = np.array(df[feature_columns].tail(lookup_step))
+    last_sequence = np.array(df[feature_columns].tail(lookup_step*12))
     
     # drop NaNs
     df.dropna(inplace=True)

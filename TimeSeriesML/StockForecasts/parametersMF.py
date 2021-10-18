@@ -21,20 +21,20 @@ SPLIT_BY_DATE = False
 split_by_date_str = f"sbd-{int(SPLIT_BY_DATE)}"
 
 # test ratio size, 0.2 is 20%
-TEST_SIZE = 0.3
+TEST_SIZE = 0.2
 # features to use
-FEATURE_COLUMNS =  ["adjclose", "sma100", "sma200", "psma100", "psma200", "MACD", "rsi100", "rsi200"]
-MA_PERIODS = [50, 100, 200]
+FEATURE_COLUMNS =  ["close", "sma12", "sma173", "MACD", "MACDDiff", "rsi12", "rsi173", "asma12", "asma173", "perc1c2", "dCO", "percc1", "ROC5", "ROC25", "dSFastSMed", "MDT", "LIN"]
+MA_PERIODS = [12, 173]
 # date now
 date_now = time.strftime("%Y-%m")
 
 ### model parameters
 
-N_LAYERS = 3
+N_LAYERS = 4
 # LSTM cell
 CELL = LSTM
 # 256 LSTM neurons
-UNITS = 64
+UNITS = 24
 # 40% dropout
 DROPOUT = 0.4
 # whether to use bidirectional RNNs

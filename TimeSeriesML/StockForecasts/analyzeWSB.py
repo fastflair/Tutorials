@@ -21,8 +21,8 @@ import squarify
 
 start_time = time.time()
 reddit = praw.Reddit(user_agent="Comment Extraction",
-    client_id="3_xzISBumaCGgg",
-    client_secret="MTMEoA3thvueOMCuPJdD2FKtPLi_mw",
+    client_id="client",
+    client_secret="secret",
     username="USERNAME",
     password="PASSWORD")
 

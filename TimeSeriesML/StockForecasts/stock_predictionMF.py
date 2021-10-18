@@ -12,6 +12,11 @@ from collections import deque
 import numpy as np
 import pandas as pd
 import random
+import pypyodbc
+cnxn = pypyodbc.connect("Driver={SQL Server Native Client 11.0};"
+                        "Server=127.0.0.1;"
+                        "Database=db;"
+                        "uid=uid;pwd=pwd")
 
 # set seed, so we can get the same results after rerunning several times
 np.random.seed(314)
@@ -67,7 +72,7 @@ def get_rsi_timeseries(prices, n=1):
     return rsi_series
 
 def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split_by_date=True,
-                test_size=0.2, feature_columns=['adjclose', 'volume'], ma_periods=[5, 20]):
+                test_size=0.2, feature_columns=['close', 'volume'], ma_periods=[5, 20], endDate="12/31/2070"):
     """
     Loads data from Yahoo Finance source, as well as scaling, shuffling, normalizing and splitting.
     Params:
@@ -82,7 +87,10 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
     # see if ticker is already a loaded stock from yahoo finance
     if isinstance(TICKER, str):
         # load it from yahoo_fin library
-        df = si.get_data(TICKER, start_date = "01/01/2016")
+        #df = si.get_data(TICKER, start_date = "01/01/2018", end_date=endDate)
+        query = "SELECT [date_time] as date_time, round([price_open]/100.0, 2) as [open], round([price_high]/100.0, 2) as [high],  round([price_low]/100.0, 2) as [low],  round([price_close]/100.0, 2) as [close],  round([adjClose]/100.0, 2) as [adjclose], [volume], '"+TICKER+"' as ticker  FROM [StockTitan].[st].[daily] where stock_id = (select stock_id from [st].[stock] where symbol = '"+TICKER+"') and date_time >= '01/01/2019' and date_time <= '"+endDate+"' and price_close > 1 order by date_time"
+        df = pd.read_sql_query(query, cnxn)
+        df = df.set_index('date_time')
     elif isinstance(TICKER, pd.DataFrame):
         # already loaded, use it directly
         df = TICKER
@@ -92,7 +100,7 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
     # add technical indicators
     for n in ma_periods:
        # Create Simple Moving Averages
-        df['sma'+str(n)] = df['adjclose'].rolling(window=n,min_periods=1).mean()
+        df['sma'+str(n)] = df['close'].rolling(window=n,min_periods=1).mean()
         # Create delta of SMAs
         df['dsma'+str(n)] = df['sma'+str(n)].diff().fillna(0).astype(float)
         # Create acc of SMAs
@@ -102,8 +110,30 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
         # Create RSI of SMAs
         df['rsi'+str(n)] = get_rsi_timeseries(df['sma'+str(n)], n)
         # Create EMA
-        df['ema'+str(n)] = df['adjclose'].ewm(span=n).mean()
-    df['MACD'] = (df['ema200']-df['ema100'])
+        df['ema'+str(n)] = df['close'].ewm(span=n).mean()
+    df['SMAFast'] = df['close'].rolling(window=7,min_periods=1).mean()
+    df['SMAMed'] = df['close'].rolling(window=65,min_periods=1).mean()
+    df['SMASlow'] = df['close'].rolling(window=126,min_periods=1).mean()
+    df['EMAFast'] = df['close'].rolling(window=7,min_periods=1).mean()
+    df['EMAMed'] = df['close'].rolling(window=26,min_periods=1).mean()
+    df['MACD'] = (df['EMAFast']-df['EMAMed'])
+    df['MACDSign'] = df['MACD'].rolling(window=9,min_periods=1).mean()
+    df['MACDDiff'] = (df['MACD']-df['MACDSign'])
+    df['perc1c2']=df['close'].shift(1) / df['close'].shift(2)
+    df['dCO']=df['close'] - df['open']
+    df['percc1']=df['close']/df['close'].shift(1)
+    df['YTDPer']=df['close'] /df['close'].shift(252)
+    df['ROC5']=df['close'] /df['close'].shift(5)
+    df['ROC10']=df['close'] /df['close'].shift(10)
+    df['ROC25']=df['close'] /df['close'].shift(25)
+    df['dSFastSMed']=df['SMAFast'] /df['SMAMed'] 
+    df['MDT']=df['close'] /df['SMASlow'] 
+    df['MDT25']=df['MDT'].shift(25)
+    df['NC'] = abs(df['close'] - df['close'].shift(1));
+    df['LIN'] = abs(((df['close'].shift(2) - df['close']) / 2.0) / (df['close'].shift(1) - df['close']))
+    df['LIN25'] = df['LIN'].rolling(window=25,min_periods=1).mean()
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df = df.fillna(0)
     
     # add date as a column
     if "date" not in df.columns:
@@ -131,11 +161,11 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
         result["column_scaler"] = column_scaler
 
     # add the target column (label) by shifting by `lookup_step`
-    df['future'] = df['adjclose'].shift(-lookup_step)
+    df['future'] = df['close'].shift(-lookup_step)
 
     # last `lookup_step` columns contains NaN in future column
     # get them before droping NaNs
-    last_sequence = np.array(df[feature_columns].tail(lookup_step))
+    last_sequence = np.array(df[feature_columns].tail(lookup_step*12))
     
     # drop NaNs
     df.dropna(inplace=True)

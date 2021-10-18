@@ -49,13 +49,13 @@ def predict(model, data):
         predicted_price = prediction[0][0]
     return predicted_price
 
-def predict_gap(model, data, df2, indexVals):
+def predict_prices(model, data, df2, indexVals):
     predicted_prices = []
-    for X in range(LOOKUP_STEP):
+    for X in range(LOOKUP_STEP*12):
         # retrieve the last sequence from data
         last_sequence = data["last_sequence"][-N_STEPS-X:]
-        # expand dimension
         last_sequence = last_sequence[:N_STEPS]
+        # expand dimension
         last_sequence = np.expand_dims(last_sequence, axis=0)
         # get the prediction (scaled from 0 to 1)
         prediction = model.predict(last_sequence)
@@ -66,22 +66,22 @@ def predict_gap(model, data, df2, indexVals):
             predicted_price = prediction[0][0]   
 
         df2.loc[indexVals[-X],'forecast'] = predicted_price
-        if X == HALF_LOOKUP_STEP:
-            HALF_LOOKUP_STEP_PRICE = predicted_price
-        if X == QUART_LOOKUP_STEP:
-            QUART_LOOKUP_STEP_PRICE = predicted_price
-    return df2, HALF_LOOKUP_STEP_PRICE, QUART_LOOKUP_STEP_PRICE
+    # add rows for future forecast
+    last_date = df2.index[-1]
+    new_index = pd.date_range(last_date, periods=LOOKUP_STEP, freq='D')
+    df3 = pd.DataFrame(index=new_index, columns=df2.columns)
+    df3 = df3.fillna(0)
+    return df2.append(df3)
 
-def plot_graph2(test_df, df2):
+def plot_graph2(future_prices):
     """
     This function plots true close price along with predicted close price
     with blue and red colors respectively
     """
     plt.figure(figsize=(18,8))
     plt.title(TICKER+" Stock Price Forecast "+ f"{LOOKUP_STEP}" +" days out", fontsize=16)
-    plt.plot(test_df[f'true_adjclose_{LOOKUP_STEP}'].tail(N_STEPS), c='b')
-    plt.plot(test_df[f'adjclose_{LOOKUP_STEP}'].tail(N_STEPS), c='r')
-    plt.plot(df2['forecast'].tail(LOOKUP_STEP-1), c='r')
+    plt.plot(future_prices[f'adjclose'][N_STEPS+1:-LOOKUP_STEP], c='b')
+    plt.plot(future_prices[f'forecast'][N_STEPS-LOOKUP_STEP+1:].shift(LOOKUP_STEP), c='r')
     plt.xlabel("Days")
     plt.ylabel("Price")
     plt.legend(["Actual Price", "Predicted Price"])
@@ -93,49 +93,6 @@ def plot_graph2(test_df, df2):
         os.remove(filename)
     plt.savefig(filename)
     #plt.show()       
-   
-def get_final_df(model, data):
-    """
-    This function takes the `model` and `data` dict to 
-    construct a final dataframe that includes the features along 
-    with true and predicted prices of the testing dataset
-    """
-    # if predicted future price is higher than the current, 
-    # then calculate the true future price minus the current price, to get the buy profit
-    buy_profit  = lambda current, true_future, pred_future: true_future - current if pred_future > current else 0
-    # if the predicted future price is lower than the current price,
-    # then subtract the true future price from the current price
-    sell_profit = lambda current, true_future, pred_future: current - true_future if pred_future < current else 0
-    X_test = data["X_test"]
-    y_test = data["y_test"]
-    # perform prediction and get prices
-    y_pred = model.predict(X_test)
-    if SCALE:
-        y_test = np.squeeze(data["column_scaler"]["adjclose"].inverse_transform(np.expand_dims(y_test, axis=0)))
-        y_pred = np.squeeze(data["column_scaler"]["adjclose"].inverse_transform(y_pred))
-    test_df = data["test_df"]
-    # add predicted future prices to the dataframe
-    test_df[f"adjclose_{LOOKUP_STEP}"] = y_pred
-    # add true future prices to the dataframe
-    test_df[f"true_adjclose_{LOOKUP_STEP}"] = y_test
-    # sort the dataframe by date
-    test_df.sort_index(inplace=True)
-    final_df = test_df
-    # add the buy profit column
-    final_df["buy_profit"] = list(map(buy_profit, 
-                                    final_df["adjclose"], 
-                                    final_df[f"adjclose_{LOOKUP_STEP}"], 
-                                    final_df[f"true_adjclose_{LOOKUP_STEP}"])
-                                    # since we don't have profit for last sequence, add 0's
-                                    )
-    # add the sell profit column
-    final_df["sell_profit"] = list(map(sell_profit, 
-                                    final_df["adjclose"], 
-                                    final_df[f"adjclose_{LOOKUP_STEP}"], 
-                                    final_df[f"true_adjclose_{LOOKUP_STEP}"])
-                                    # since we don't have profit for last sequence, add 0's
-                                    )
-    return final_df
 
 # load the data
 data = load_data(TICKER, N_STEPS, scale=SCALE, split_by_date=SPLIT_BY_DATE, 
@@ -157,18 +114,16 @@ model.load_weights(model_path)
 
 # Need to correct scalar for plotting prices without actuals
 # get the final dataframe for the testing set
-final_df = get_final_df(model, data)
-
-df2 = data['df'].tail(LOOKUP_STEP)
+df2 = data['df'].tail(LOOKUP_STEP*12)
 df2['forecast'] = 0
 
 indexVals = []
 for index in df2.index:
     indexVals.append(index)    
-future_prices, HALF_LOOKUP_STEP_PRICE, QUART_LOOKUP_STEP_PRICE = predict_gap(model, data, df2, indexVals)
+future_prices = predict_prices(model, data, df2, indexVals)
 
 # plot true/pred prices graph
-plot_graph2(final_df, df2)
+plot_graph2(future_prices)
     
 future_price = predict(model, data)
 

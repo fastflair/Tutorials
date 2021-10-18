@@ -20,11 +20,12 @@ shuffle_str = f"sh-{int(SHUFFLE)}"
 SPLIT_BY_DATE = False
 split_by_date_str = f"sbd-{int(SPLIT_BY_DATE)}"
 
-# test ratio size, 0.2 is 20%
-TEST_SIZE = 0.3
+# test ratio size, 0.2 is 20% (80/20 rule)
+TEST_SIZE = 0.2
 # features to use
-FEATURE_COLUMNS = ["adjclose", "volume", "open", "high", "low", "close", "psma5", "psma20", "psma50", "psma100", "psma200", "MACD", "momentum", "OBV_SMA3", "OBV_SMA50", "dOBV50", "cumSumOBV50", "dcumSumOBV50"]
-MA_PERIODS = [5, 20, 50, 100, 200]
+#FEATURE_COLUMNS = ["adjclose", "volume", "open", "high", "low", "close", "sma12", "sma173", "MACD", "momentum", "OBVFast", "OBVSlow", "SMAVol20", "cumSumOBVFastSlow", "dCumSumOBVFastSlow"]
+FEATURE_COLUMNS = ["adjclose", "volume", "open", "high", "low", "close", "perc1c2", "percc1", "SMAFast", "SMASlow", "dSMAFS", "dSFastSMed", "OBVFast", "OBVSlow", "dOBV", "MACD", "MACDD"]
+MA_PERIODS = [12, 173]
 # date now
 date_now = time.strftime("%Y-%m")
 
@@ -34,7 +35,7 @@ N_LAYERS = 4
 # LSTM cell
 CELL = LSTM
 # 256 LSTM neurons
-UNITS = 64
+UNITS = 16
 # 40% dropout
 DROPOUT = 0.4
 # whether to use bidirectional RNNs

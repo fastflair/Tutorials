@@ -7,6 +7,9 @@ pd.options.mode.chained_assignment = None  # default='warn'
 DAYS_BEFORE_LOOKUP = 0
 HALF_LOOKUP_STEP = 0
 HALF_LOOKUP_STEP_PRICE = 0
+QUART_LOOKUP_STEP = 0
+QUART_LOOKUP_STEP_PRICE = 0
+simdate = "12/31/2070"
 
 # date now
 date_now = time.strftime("%Y-%m")
@@ -14,9 +17,12 @@ if len(sys.argv) > 2:
     TICKER = sys.argv[1]
     LOOKUP_STEP = int(sys.argv[2])
     HALF_LOOKUP_STEP = int(LOOKUP_STEP/2)
+    DAY_LOOKUP_STEP = 1
     model_name = f"{date_now}_{TICKER}-{shuffle_str}-{scale_str}-{split_by_date_str}-{LOSS}-{OPTIMIZER}-{CELL.__name__}-seq-{N_STEPS}-step-{LOOKUP_STEP}-layers-{N_LAYERS}-units-{UNITS}-activation-{ACTIVATION}"
     if BIDIRECTIONAL:
         model_name += "-b"
+if len(sys.argv) > 3:
+    simdate = sys.argv[3]
         
 import os
 from os import path
@@ -37,42 +43,44 @@ def predict(model, data):
     prediction = model.predict(last_sequence)
     # get the price (by inverting the scaling)
     if SCALE:
-        predicted_price = data["column_scaler"]["adjclose"].inverse_transform(prediction)[0][0]
+        predicted_price = data["column_scaler"]["close"].inverse_transform(prediction)[0][0]
     else:
         predicted_price = prediction[0][0]
     return predicted_price
 
-def predict_gap(model, data, df2, indexVals):
+def predict_prices(model, data, df2, indexVals):
     predicted_prices = []
-    for X in range(LOOKUP_STEP):
-        # retrieve the last sequence from data
+    for X in range(len(df2.index)):
+# retrieve the last sequence from data
         last_sequence = data["last_sequence"][-N_STEPS-X:]
+        last_sequence = last_sequence[:N_STEPS]
         # expand dimension
         last_sequence = np.expand_dims(last_sequence, axis=0)
-        last_sequence = last_sequence[:N_STEPS]
         # get the prediction (scaled from 0 to 1)
         prediction = model.predict(last_sequence)
         # get the price (by inverting the scaling)
         if SCALE:
-            predicted_price = data["column_scaler"]["adjclose"].inverse_transform(prediction)[0][0]
+            predicted_price = data["column_scaler"]["close"].inverse_transform(prediction)[0][0]
         else:
             predicted_price = prediction[0][0]   
 
         df2.loc[indexVals[-X],'forecast'] = predicted_price
-        if X == HALF_LOOKUP_STEP:
-            HALF_LOOKUP_STEP_PRICE = predicted_price
-    return df2, HALF_LOOKUP_STEP_PRICE
+        # add rows for future forecast
+    last_date = df2.index[-1]
+    new_index = pd.date_range(last_date, periods=LOOKUP_STEP, freq='D')
+    df3 = pd.DataFrame(index=new_index, columns=df2.columns)
+    
+    return df2.append(df3)
 
-def plot_graph2(test_df, df2):
+def plot_graph2(future_prices):
     """
     This function plots true close price along with predicted close price
     with blue and red colors respectively
     """
     plt.figure(figsize=(18,8))
-    plt.title(TICKER+" Mutual Fund Price Forecast "+ f"{LOOKUP_STEP}" +" days out", fontsize=16)
-    plt.plot(test_df[f'true_adjclose_{LOOKUP_STEP}'].tail(N_STEPS), c='b')
-    plt.plot(test_df[f'adjclose_{LOOKUP_STEP}'].tail(N_STEPS), c='r')
-    plt.plot(df2['forecast'].tail(LOOKUP_STEP-1), c='r')
+    plt.title(TICKER+" Stock Price Forecast "+ f"{LOOKUP_STEP}" +" days out", fontsize=16)
+    plt.plot(future_prices[f'close'][N_STEPS+1:-LOOKUP_STEP], c='b')
+    plt.plot(future_prices[f'forecast'][N_STEPS-LOOKUP_STEP+1:].shift(LOOKUP_STEP), c='r')
     plt.xlabel("Days")
     plt.ylabel("Price")
     plt.legend(["Actual Price", "Predicted Price"])
@@ -83,7 +91,7 @@ def plot_graph2(test_df, df2):
     with contextlib.suppress(FileNotFoundError):
         os.remove(filename)
     plt.savefig(filename)
-    #plt.show()    
+    #plt.show()       
    
 def get_final_df(model, data):
     """
@@ -102,28 +110,28 @@ def get_final_df(model, data):
     # perform prediction and get prices
     y_pred = model.predict(X_test)
     if SCALE:
-        y_test = np.squeeze(data["column_scaler"]["adjclose"].inverse_transform(np.expand_dims(y_test, axis=0)))
-        y_pred = np.squeeze(data["column_scaler"]["adjclose"].inverse_transform(y_pred))
+        y_test = np.squeeze(data["column_scaler"]["close"].inverse_transform(np.expand_dims(y_test, axis=0)))
+        y_pred = np.squeeze(data["column_scaler"]["close"].inverse_transform(y_pred))
     test_df = data["test_df"]
     # add predicted future prices to the dataframe
-    test_df[f"adjclose_{LOOKUP_STEP}"] = y_pred
+    test_df[f"close{LOOKUP_STEP}"] = y_pred
     # add true future prices to the dataframe
-    test_df[f"true_adjclose_{LOOKUP_STEP}"] = y_test
+    test_df[f"true_close_{LOOKUP_STEP}"] = y_test
     # sort the dataframe by date
     test_df.sort_index(inplace=True)
     final_df = test_df
     # add the buy profit column
     final_df["buy_profit"] = list(map(buy_profit, 
-                                    final_df["adjclose"], 
-                                    final_df[f"adjclose_{LOOKUP_STEP}"], 
-                                    final_df[f"true_adjclose_{LOOKUP_STEP}"])
+                                    final_df["close"], 
+                                    final_df[f"close{LOOKUP_STEP}"], 
+                                    final_df[f"true_close_{LOOKUP_STEP}"])
                                     # since we don't have profit for last sequence, add 0's
                                     )
     # add the sell profit column
     final_df["sell_profit"] = list(map(sell_profit, 
-                                    final_df["adjclose"], 
-                                    final_df[f"adjclose_{LOOKUP_STEP}"], 
-                                    final_df[f"true_adjclose_{LOOKUP_STEP}"])
+                                    final_df["close"], 
+                                    final_df[f"close{LOOKUP_STEP}"], 
+                                    final_df[f"true_close_{LOOKUP_STEP}"])
                                     # since we don't have profit for last sequence, add 0's
                                     )
     return final_df
@@ -131,7 +139,7 @@ def get_final_df(model, data):
 # load the data
 data = load_data(TICKER, N_STEPS, scale=SCALE, split_by_date=SPLIT_BY_DATE, 
                 shuffle=SHUFFLE, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE, 
-                feature_columns=FEATURE_COLUMNS, ma_periods=MA_PERIODS)
+                feature_columns=FEATURE_COLUMNS, ma_periods=MA_PERIODS, endDate=simdate)
 
 # construct the model
 model = create_model(N_STEPS, len(FEATURE_COLUMNS), loss=LOSS, units=UNITS, cell=CELL, n_layers=N_LAYERS, dropout=DROPOUT, optimizer=OPTIMIZER, bidirectional=BIDIRECTIONAL, activation=ACTIVATION)
@@ -148,19 +156,23 @@ model.load_weights(model_path)
 
 # Need to correct scalar for plotting prices without actuals
 # get the final dataframe for the testing set
-final_df = get_final_df(model, data)
-df2 = data['df'].tail(LOOKUP_STEP+DAYS_BEFORE_LOOKUP)
+df2 = data['df'].tail(LOOKUP_STEP*12-N_STEPS-LOOKUP_STEP-1)
 df2['forecast'] = 0
 
 indexVals = []
 for index in df2.index:
     indexVals.append(index)    
-future_prices, HALF_LOOKUP_STEP_PRICE = predict_gap(model, data, df2, indexVals)
-    
-future_price = predict(model, data)
-print(f"Future $ price after {LOOKUP_STEP} days is {future_price:.2f}")
-print(f"Future $ price after {HALF_LOOKUP_STEP} days is {HALF_LOOKUP_STEP_PRICE:.2f}")
-
+future_prices = predict_prices(model, data, df2, indexVals)
 
 # plot true/pred prices graph
-plot_graph2(final_df, df2)
+plot_graph2(future_prices)
+    
+future_price = predict(model, data)
+
+#update prices
+future_price = df2['forecast'][df2.index[-1]]
+HALF_LOOKUP_STEP_PRICE = df2['forecast'][df2.index[-HALF_LOOKUP_STEP]]
+DAY_LOOKUP_STEP_PRICE = df2['forecast'][df2.index[-LOOKUP_STEP+DAY_LOOKUP_STEP]]
+print(f"Future $ price after {LOOKUP_STEP} days is {future_price:.2f}")
+print(f"Future $ price after {HALF_LOOKUP_STEP} days is {HALF_LOOKUP_STEP_PRICE:.2f}")
+print(f"Future $ price after {DAY_LOOKUP_STEP} days is {DAY_LOOKUP_STEP_PRICE:.2f}")

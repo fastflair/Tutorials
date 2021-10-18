@@ -5,7 +5,8 @@ import sys
 import pandas as pd
 
 # date now
-date_now = time.strftime("%Y-%m")    
+date_now = time.strftime("%Y-%m")  
+simdate = time.strftime("%m/%d/%Y")  
 if len(sys.argv) > 2:
     TICKER = sys.argv[1]
     LOOKUP_STEP = int(sys.argv[2])

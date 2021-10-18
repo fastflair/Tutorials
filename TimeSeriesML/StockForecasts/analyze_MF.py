@@ -16,7 +16,7 @@ CLI.add_argument('--mfs', '--names-list', nargs='*', default=['DSMDX', 'RYVIX', 
 # parse the command line
 args = CLI.parse_args()
 # access CLI options
-#print("listMFs: %r" % args.mfs)
+print("listMFs: %r" % args.mfs)
 
 TICKERS = []
 tickers = args.mfs
@@ -127,7 +127,7 @@ min_vol_port = portfolios.iloc[portfolios['Volatility'].idxmin()]
 #plt.scatter(min_vol_port[1], min_vol_port[0], color='r', marker='*', s=500)
 
 # Finding the optimal portfolio
-rf = 0.007 # risk factor
+rf = 0.003 # risk factor
 optimal_risky_port = portfolios.iloc[((portfolios['Returns']-rf)/portfolios['Volatility']).idxmax()]
 
 
