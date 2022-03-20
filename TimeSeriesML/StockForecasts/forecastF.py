@@ -53,7 +53,7 @@ def fourierExtrapolation(x, n_predict, period):
         restored_sig += ampli * np.cos(2 * np.pi * f[i] * t + phase)
     return restored_sig + p[0] * t
 
-query = "SELECT [date_time] as date_time, round([price_open]/100.0, 2) as [open], round([price_high]/100.0, 2) as [high],  round([price_low]/100.0, 2) as [low],  round([price_close]/100.0, 2) as [close],  round([adjClose]/100.0, 2) as [adjclose], [volume], '"+TICKER+"' as ticker  FROM [StockTitan].[st].[daily] where stock_id = (select top(1) stock_id from [st].[stock] where symbol = '"+TICKER+"') and date_time + 2555 >= '"+endDate+"' and date_time <= '"+endDate+"' and volume > 0 and price_close > 0 order by date_time"
+query = "SELECT [date_time] as date_time, round([price_open]/100.0, 2) as [open], round([price_high]/100.0, 2) as [high],  round([price_low]/100.0, 2) as [low],  round([price_close]/100.0, 2) as [close],  round([adjClose]/100.0, 2) as [adjclose], [volume], '"+TICKER+"' as ticker  FROM [StockTitan].[st].[daily] where stock_id = (select top(1) stock_id from [st].[stock] where symbol = '"+TICKER+"') and date_time + 3542 >= '"+endDate+"' and date_time <= '"+endDate+"' and volume > 0 and price_close > 0 order by date_time"
 df = pd.read_sql_query(query, cnxn)
 df['adjclose'].iloc[-1] = df['close'].iloc[-1]
 df = df.set_index('date_time')
@@ -70,7 +70,6 @@ extrapolation[extrapolation < 0] = 0
 pl.plot(np.arange(0, hist.size), hist, 'b', label = 'Data', linewidth = 3)
 pl.plot(np.arange(0, train.size), train, 'c', label = 'Train', linewidth = 2)
 pl.plot(np.arange(0, extrapolation.size), extrapolation, 'r', label = 'Predict', linewidth = 1)
-
 pl.legend()
 
 
