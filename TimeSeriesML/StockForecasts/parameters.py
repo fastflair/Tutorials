@@ -4,9 +4,9 @@ from tensorflow.keras.layers import LSTM
 
 
 # Window size or the sequence length
-N_STEPS = 60
+N_STEPS = 80
 # Lookup step, 1 is the next day
-LOOKUP_STEP = 5
+LOOKUP_STEP = 16
 
 # whether to scale feature columns & output price as well
 SCALE = True
@@ -23,21 +23,20 @@ split_by_date_str = f"sbd-{int(SPLIT_BY_DATE)}"
 # test ratio size, 0.2 is 20% (80/20 rule)
 TEST_SIZE = 0.2
 # features to use
-#FEATURE_COLUMNS = ["adjclose", "volume", "open", "high", "low", "close", "sma12", "sma173", "MACD", "momentum", "OBVFast", "OBVSlow", "SMAVol20", "cumSumOBVFastSlow", "dCumSumOBVFastSlow"]
-FEATURE_COLUMNS = ["adjclose", "volume", "open", "high", "low", "close", "perc1c2", "percc1", "ema1", "ema2", "ema3", "in_uptrend", "kst", "ROC10", "SMAVol20", "sma20","wema1", "wema2", "wema3", "momentum", "volmom", "rsi", "MACD", "SMArsi", "drsi"]
+FEATURE_COLUMNS = ["adjclose", "volume", "open", "high", "low", "close", "perc1c2", "percc1", "ema1", "ema2", "ema3", "in_uptrend", "kst", "ROC10", "SMAVol20", "sma20","wema1", "wema2", "wema3", "momentum", "volmom", "rsi", "SMArsi", "drsi", "dSMArsi", "smah4", "dsmah4"]
 MA_PERIODS = []
 # date now
 date_now = time.strftime("%Y-%m")
 
 ### model parameters
 
-N_LAYERS = 4
+N_LAYERS = 3
 # LSTM cell
 CELL = LSTM
 # 256 LSTM neurons
-UNITS = 16
-# 40% dropout
-DROPOUT = 0.4
+UNITS = 32
+# 20% dropout
+DROPOUT = 0.2
 # whether to use bidirectional RNNs
 BIDIRECTIONAL = True
 

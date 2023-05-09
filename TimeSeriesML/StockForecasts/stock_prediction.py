@@ -130,6 +130,7 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
         feature_columns (list): the list of features to use to feed into the model, default is everything grabbed from yahoo_fin
     """
     # see if ticker is already a loaded stock from yahoo finance
+    # see if ticker is already a loaded stock from yahoo finance
     if isinstance(TICKER, str):
         # load it from yahoo_fin library
         df = si.get_data(TICKER, start_date = "01/01/2018")
@@ -168,9 +169,12 @@ def load_data(TICKER, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
     df['ema2'] = df['adjclose'].ewm(span=14).mean()
     df['ema3'] =  df['adjclose'].ewm(span=21).mean()
     df['MACD'] = (df['ema1'] - df['ema3'])
-    df['rsi'] = get_rsi_timeseries(df['adjclose'], 14)
-    df['SMArsi'] = df['rsi'].ewm(span=14).mean()
+    df['rsi'] = get_rsi_timeseries(df['adjclose'], 12)
+    df['SMArsi'] = df['rsi'].ewm(span=15).mean()
     df['drsi'] = df['rsi'] - df['SMArsi']
+    df['dSMArsi'] = df['SMArsi'].shift(1).fillna(0).astype(float) - df['SMArsi']
+    df['smah4'] = df['adjclose'].ewm(span=4).mean()
+    df['dsmah4'] = df['adjclose'] - df['smah4']
     #df['MACDS'] = df['MACD'].ewm(span=7).mean()
     #df['MACDD'] = df['MACD'] - df['MACDS']
     
