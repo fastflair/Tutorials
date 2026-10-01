@@ -1,0 +1,350 @@
+{
+ "best.pt": {
+  "open100_heldout6": {
+   "sheets": 6,
+   "node_AP50": 0.6215,
+   "symbol_mAP50_7cls": 0.4065,
+   "AP50_per_class": {},
+   "large_equipment_recall": {
+    "pump": "16/16",
+    "tank": "15/15"
+   },
+   "edges_relation_head": {
+    "edge_mAP": 0.0,
+    "edge_AP_solid": 0.0,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.0,
+    "edge_precision": 0.0,
+    "edge_recall": 0.0,
+    "n_gt_edges": 836
+   },
+   "edges_line_trace": {
+    "edge_mAP": 0.1071,
+    "edge_AP_solid": 0.1071,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.0834,
+    "edge_precision": 0.3818,
+    "edge_recall": 0.2608,
+    "n_gt_edges": 836
+   },
+   "edges_combined": {
+    "edge_mAP": 0.1071,
+    "edge_AP_solid": 0.1071,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.0834,
+    "edge_precision": 0.3818,
+    "edge_recall": 0.2608,
+    "n_gt_edges": 836
+   },
+   "seconds": 13
+  },
+  "open100_all12": {
+   "sheets": 12,
+   "node_AP50": 0.6603,
+   "symbol_mAP50_7cls": 0.3776,
+   "AP50_per_class": {},
+   "large_equipment_recall": {
+    "tank": "33/35",
+    "pump": "16/16"
+   },
+   "edges_relation_head": {
+    "edge_mAP": 0.0,
+    "edge_AP_solid": 0.0,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.0,
+    "edge_precision": 0.0,
+    "edge_recall": 0.0,
+    "n_gt_edges": 1852
+   },
+   "edges_line_trace": {
+    "edge_mAP": 0.0932,
+    "edge_AP_solid": 0.0932,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.0986,
+    "edge_precision": 0.3797,
+    "edge_recall": 0.2478,
+    "n_gt_edges": 1852
+   },
+   "edges_combined": {
+    "edge_mAP": 0.0932,
+    "edge_AP_solid": 0.0932,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.0986,
+    "edge_precision": 0.3797,
+    "edge_recall": 0.2478,
+    "n_gt_edges": 1852
+   },
+   "seconds": 26
+  },
+  "p2g_synthetic_val": {
+   "sheets": 50,
+   "node_AP50": 0.5947,
+   "symbol_mAP50_7cls": 0.2302,
+   "AP50_per_class": {},
+   "large_equipment_recall": {
+    "tank": "127/155",
+    "pump": "88/89"
+   },
+   "edges_relation_head": {
+    "edge_mAP": 0.0,
+    "edge_AP_solid": 0.0,
+    "edge_AP_dashed": 0.0,
+    "edge_AP_agnostic": 0.0,
+    "edge_precision": 0.0,
+    "edge_recall": 0.0,
+    "n_gt_edges": 1117
+   },
+   "edges_line_trace": {
+    "edge_mAP": 0.1164,
+    "edge_AP_solid": 0.221,
+    "edge_AP_dashed": 0.0118,
+    "edge_AP_agnostic": 0.1663,
+    "edge_precision": 0.5423,
+    "edge_recall": 0.2981,
+    "n_gt_edges": 1117
+   },
+   "edges_combined": {
+    "edge_mAP": 0.1164,
+    "edge_AP_solid": 0.221,
+    "edge_AP_dashed": 0.0118,
+    "edge_AP_agnostic": 0.1663,
+    "edge_precision": 0.5423,
+    "edge_recall": 0.2981,
+    "n_gt_edges": 1117
+   },
+   "seconds": 286
+  }
+ },
+ "relation_head.pt": {
+  "open100_heldout6": {
+   "sheets": 6,
+   "node_AP50": 0.6782,
+   "symbol_mAP50_7cls": 0.4085,
+   "AP50_per_class": {},
+   "large_equipment_recall": {
+    "pump": "14/16",
+    "tank": "14/15"
+   },
+   "edges_relation_head": {
+    "edge_mAP": 0.1363,
+    "edge_AP_solid": 0.1363,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.1422,
+    "edge_precision": 0.3826,
+    "edge_recall": 0.2727,
+    "n_gt_edges": 836
+   },
+   "edges_line_trace": {
+    "edge_mAP": 0.1221,
+    "edge_AP_solid": 0.1221,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.0818,
+    "edge_precision": 0.3715,
+    "edge_recall": 0.2679,
+    "n_gt_edges": 836
+   },
+   "edges_combined": {
+    "edge_mAP": 0.1439,
+    "edge_AP_solid": 0.1439,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.1102,
+    "edge_precision": 0.3415,
+    "edge_recall": 0.3684,
+    "n_gt_edges": 836
+   },
+   "seconds": 14
+  },
+  "open100_all12": {
+   "sheets": 12,
+   "node_AP50": 0.71,
+   "symbol_mAP50_7cls": 0.3733,
+   "AP50_per_class": {},
+   "large_equipment_recall": {
+    "tank": "31/35",
+    "pump": "14/16"
+   },
+   "edges_relation_head": {
+    "edge_mAP": 0.1245,
+    "edge_AP_solid": 0.1245,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.135,
+    "edge_precision": 0.3872,
+    "edge_recall": 0.2716,
+    "n_gt_edges": 1852
+   },
+   "edges_line_trace": {
+    "edge_mAP": 0.1104,
+    "edge_AP_solid": 0.1104,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.1,
+    "edge_precision": 0.3725,
+    "edge_recall": 0.2586,
+    "n_gt_edges": 1852
+   },
+   "edges_combined": {
+    "edge_mAP": 0.1348,
+    "edge_AP_solid": 0.1348,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.1171,
+    "edge_precision": 0.3395,
+    "edge_recall": 0.3558,
+    "n_gt_edges": 1852
+   },
+   "seconds": 29
+  },
+  "p2g_synthetic_val": {
+   "sheets": 50,
+   "node_AP50": 0.9792,
+   "symbol_mAP50_7cls": 0.2288,
+   "AP50_per_class": {},
+   "large_equipment_recall": {
+    "tank": "155/155",
+    "pump": "89/89"
+   },
+   "edges_relation_head": {
+    "edge_mAP": 0.388,
+    "edge_AP_solid": 0.4791,
+    "edge_AP_dashed": 0.2969,
+    "edge_AP_agnostic": 0.5144,
+    "edge_precision": 0.8267,
+    "edge_recall": 0.5425,
+    "n_gt_edges": 1117
+   },
+   "edges_line_trace": {
+    "edge_mAP": 0.3637,
+    "edge_AP_solid": 0.7189,
+    "edge_AP_dashed": 0.0085,
+    "edge_AP_agnostic": 0.5845,
+    "edge_precision": 0.887,
+    "edge_recall": 0.6607,
+    "n_gt_edges": 1117
+   },
+   "edges_combined": {
+    "edge_mAP": 0.4771,
+    "edge_AP_solid": 0.6567,
+    "edge_AP_dashed": 0.2975,
+    "edge_AP_agnostic": 0.6703,
+    "edge_precision": 0.8107,
+    "edge_recall": 0.8165,
+    "n_gt_edges": 1117
+   },
+   "seconds": 291
+  }
+ },
+ "selftrain_r0.pt": {
+  "open100_heldout6": {
+   "sheets": 6,
+   "node_AP50": 0.5459,
+   "symbol_mAP50_7cls": 0.4372,
+   "AP50_per_class": {},
+   "large_equipment_recall": {
+    "pump": "15/16",
+    "tank": "13/15"
+   },
+   "edges_relation_head": {
+    "edge_mAP": 0.0267,
+    "edge_AP_solid": 0.0267,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.0338,
+    "edge_precision": 0.5366,
+    "edge_recall": 0.0526,
+    "n_gt_edges": 836
+   },
+   "edges_line_trace": {
+    "edge_mAP": 0.0096,
+    "edge_AP_solid": 0.0096,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.0045,
+    "edge_precision": 0.0752,
+    "edge_recall": 0.0574,
+    "n_gt_edges": 836
+   },
+   "edges_combined": {
+    "edge_mAP": 0.009,
+    "edge_AP_solid": 0.009,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.0055,
+    "edge_precision": 0.0993,
+    "edge_recall": 0.0801,
+    "n_gt_edges": 836
+   },
+   "seconds": 12
+  },
+  "open100_all12": {
+   "sheets": 12,
+   "node_AP50": 0.5742,
+   "symbol_mAP50_7cls": 0.4246,
+   "AP50_per_class": {},
+   "large_equipment_recall": {
+    "tank": "26/35",
+    "pump": "15/16"
+   },
+   "edges_relation_head": {
+    "edge_mAP": 0.0258,
+    "edge_AP_solid": 0.0258,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.0315,
+    "edge_precision": 0.5257,
+    "edge_recall": 0.0497,
+    "n_gt_edges": 1852
+   },
+   "edges_line_trace": {
+    "edge_mAP": 0.0118,
+    "edge_AP_solid": 0.0118,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.012,
+    "edge_precision": 0.1139,
+    "edge_recall": 0.061,
+    "n_gt_edges": 1852
+   },
+   "edges_combined": {
+    "edge_mAP": 0.0114,
+    "edge_AP_solid": 0.0114,
+    "edge_AP_dashed": NaN,
+    "edge_AP_agnostic": 0.012,
+    "edge_precision": 0.1391,
+    "edge_recall": 0.081,
+    "n_gt_edges": 1852
+   },
+   "seconds": 25
+  },
+  "p2g_synthetic_val": {
+   "sheets": 50,
+   "node_AP50": 0.9786,
+   "symbol_mAP50_7cls": 0.2272,
+   "AP50_per_class": {},
+   "large_equipment_recall": {
+    "tank": "155/155",
+    "pump": "89/89"
+   },
+   "edges_relation_head": {
+    "edge_mAP": 0.4202,
+    "edge_AP_solid": 0.5044,
+    "edge_AP_dashed": 0.336,
+    "edge_AP_agnostic": 0.5254,
+    "edge_precision": 0.815,
+    "edge_recall": 0.556,
+    "n_gt_edges": 1117
+   },
+   "edges_line_trace": {
+    "edge_mAP": 0.3833,
+    "edge_AP_solid": 0.7576,
+    "edge_AP_dashed": 0.009,
+    "edge_AP_agnostic": 0.6134,
+    "edge_precision": 0.9011,
+    "edge_recall": 0.6849,
+    "n_gt_edges": 1117
+   },
+   "edges_combined": {
+    "edge_mAP": 0.5162,
+    "edge_AP_solid": 0.6916,
+    "edge_AP_dashed": 0.3407,
+    "edge_AP_agnostic": 0.7048,
+    "edge_precision": 0.8117,
+    "edge_recall": 0.8415,
+    "n_gt_edges": 1117
+   },
+   "seconds": 291
+  }
+ }
+}

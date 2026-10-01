@@ -7,3 +7,6 @@ runs/pidformer/*
 !runs/pidformer/best.pt
 !runs/pidformer/history.json
 !runs/pidformer/sheet_metrics.json
+!runs/pidformer/relation_head.pt
+!runs/pidformer/selftrain_r0.pt
+!runs/pidformer/p2g_metrics.json
