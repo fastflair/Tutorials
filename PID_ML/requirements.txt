@@ -10,6 +10,7 @@ scipy>=1.11
 scikit-learn>=1.4
 matplotlib>=3.8
 opencv-python-headless>=4.9
+scikit-image>=0.22        # skeleton for the line tracer (§3b)
 pillow>=10.0
 huggingface_hub>=0.24
 easyocr>=1.7

@@ -16,37 +16,55 @@
    "n_gt_edges": 21262
   },
   "line_trace": {
-   "edge_mAP": 0.5955351311895365,
-   "edge_AP_solid": 0.8777216284373448,
-   "edge_AP_dashed": 0.3133486339417283,
-   "edge_AP_agnostic": 0.8259562278636129,
-   "edge_precision": 0.9945948989358707,
-   "edge_recall": 0.8308249459128962,
+   "edge_mAP": 0.7791316515341453,
+   "edge_AP_solid": 0.9243108313954718,
+   "edge_AP_dashed": 0.6339524716728188,
+   "edge_AP_agnostic": 0.9722386577296422,
+   "edge_precision": 0.9236874236874237,
+   "edge_recall": 0.9962374188693444,
+   "n_gt_edges": 21262
+  },
+  "combined": {
+   "edge_mAP": 0.7835241043364225,
+   "edge_AP_solid": 0.9347077705370264,
+   "edge_AP_dashed": 0.6323404381358187,
+   "edge_AP_agnostic": 0.985860899422991,
+   "edge_precision": 0.8334906031296689,
+   "edge_recall": 0.9970369673596087,
    "n_gt_edges": 21262
   }
  },
  "real_zenodo": {
   "node_AP50": 0.816796600818634,
   "edge_label_source": {
-   "line_trace": 13
+   "line_trace": 16
   },
   "relation_head": {
-   "edge_mAP": 0.10209934542675354,
-   "edge_AP_solid": 0.18707933715501285,
-   "edge_AP_dashed": 0.017119353698494242,
-   "edge_AP_agnostic": 0.19489422569638226,
-   "edge_precision": 0.018577341418808353,
-   "edge_recall": 0.5626822157434402,
-   "n_gt_edges": 686
+   "edge_mAP": 0.12784594147821987,
+   "edge_AP_solid": 0.20038139613673828,
+   "edge_AP_dashed": 0.055310486819701465,
+   "edge_AP_agnostic": 0.24012935193380372,
+   "edge_precision": 0.03327232624712563,
+   "edge_recall": 0.5825801150369762,
+   "n_gt_edges": 1217
   },
   "line_trace": {
-   "edge_mAP": 0.22200800416832334,
-   "edge_AP_solid": 0.31946728244446976,
-   "edge_AP_dashed": 0.12454872589217694,
-   "edge_AP_agnostic": 0.27359628437676964,
-   "edge_precision": 0.5476575121163166,
-   "edge_recall": 0.49416909620991256,
-   "n_gt_edges": 686
+   "edge_mAP": 0.292520609277998,
+   "edge_AP_solid": 0.3405944623467301,
+   "edge_AP_dashed": 0.2444467562092659,
+   "edge_AP_agnostic": 0.3714599837547848,
+   "edge_precision": 0.37124463519313305,
+   "edge_recall": 0.5686113393590797,
+   "n_gt_edges": 1217
+  },
+  "combined": {
+   "edge_mAP": 0.3057635866006688,
+   "edge_AP_solid": 0.35993752367280113,
+   "edge_AP_dashed": 0.25158964952853646,
+   "edge_AP_agnostic": 0.39590306372376033,
+   "edge_precision": 0.3035405872193437,
+   "edge_recall": 0.5776499589153656,
+   "n_gt_edges": 1217
   }
  }
 }
