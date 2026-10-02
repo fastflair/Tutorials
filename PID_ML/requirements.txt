@@ -13,5 +13,10 @@ opencv-python-headless>=4.9
 pillow>=10.0
 huggingface_hub>=0.24
 easyocr>=1.7
-anthropic>=0.120
+anthropic>=0.120          # Claude API, Claude on Microsoft Foundry (AnthropicFoundry) and on Amazon Bedrock (AnthropicBedrockMantle)
+networkx>=3.4
+pypdfium2>=4.30           # PDF drawings (section 12)
 jupyter
+# Optional LLM providers for section 12:
+# openai>=1.40            # Azure OpenAI (provider="azure", azure_api="openai")
+# boto3>=1.35             # non-Claude Amazon Bedrock models via the Converse API (provider="bedrock")
