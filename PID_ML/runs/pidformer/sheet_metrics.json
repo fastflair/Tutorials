@@ -16,20 +16,20 @@
    "n_gt_edges": 21262
   },
   "line_trace": {
-   "edge_mAP": 0.7790881659521687,
-   "edge_AP_solid": 0.9237936030980313,
-   "edge_AP_dashed": 0.6343827288063062,
-   "edge_AP_agnostic": 0.9718615930989185,
-   "edge_precision": 0.9233150231057634,
+   "edge_mAP": 0.8947665925270565,
+   "edge_AP_solid": 0.9491096648333586,
+   "edge_AP_dashed": 0.8404235202207544,
+   "edge_AP_agnostic": 0.9721598664824305,
+   "edge_precision": 0.9235163301792177,
    "edge_recall": 0.9960963220769448,
    "n_gt_edges": 21262
   },
   "combined": {
-   "edge_mAP": 0.7836210448332066,
-   "edge_AP_solid": 0.934617697924366,
-   "edge_AP_dashed": 0.6326243917420471,
-   "edge_AP_agnostic": 0.9858282395520046,
-   "edge_precision": 0.832999331997328,
+   "edge_mAP": 0.8909614653707139,
+   "edge_AP_solid": 0.9655818512343385,
+   "edge_AP_dashed": 0.8163410795070893,
+   "edge_AP_agnostic": 0.9859081593439527,
+   "edge_precision": 0.8331630246816538,
    "edge_recall": 0.9970369673596087,
    "n_gt_edges": 21262
   }
@@ -40,31 +40,31 @@
    "line_trace": 16
   },
   "relation_head": {
-   "edge_mAP": 0.12590178869343932,
-   "edge_AP_solid": 0.1973602249542767,
-   "edge_AP_dashed": 0.05444335243260195,
-   "edge_AP_agnostic": 0.23985446024478516,
-   "edge_precision": 0.03138532601971378,
-   "edge_recall": 0.6253081347576006,
-   "n_gt_edges": 1217
+   "edge_mAP": 0.1385556472901108,
+   "edge_AP_solid": 0.20871957913080103,
+   "edge_AP_dashed": 0.06839171544942058,
+   "edge_AP_agnostic": 0.23954679320331537,
+   "edge_precision": 0.03212768589928651,
+   "edge_recall": 0.62570281124498,
+   "n_gt_edges": 1245
   },
   "line_trace": {
-   "edge_mAP": 0.31066874182633597,
-   "edge_AP_solid": 0.34397559817592327,
-   "edge_AP_dashed": 0.2773618854767487,
-   "edge_AP_agnostic": 0.3765087848875486,
-   "edge_precision": 0.3645885286783042,
-   "edge_recall": 0.600657354149548,
-   "n_gt_edges": 1217
+   "edge_mAP": 0.3687794346826972,
+   "edge_AP_solid": 0.36624337941621443,
+   "edge_AP_dashed": 0.37131548994917996,
+   "edge_AP_agnostic": 0.3775923925654544,
+   "edge_precision": 0.37202380952380953,
+   "edge_recall": 0.6024096385542169,
+   "n_gt_edges": 1245
   },
   "combined": {
-   "edge_mAP": 0.3368069261907529,
-   "edge_AP_solid": 0.37681225166564747,
-   "edge_AP_dashed": 0.2968016007158584,
-   "edge_AP_agnostic": 0.4156583775328003,
-   "edge_precision": 0.29404808829325974,
-   "edge_recall": 0.6129827444535744,
-   "n_gt_edges": 1217
+   "edge_mAP": 0.41166394928688727,
+   "edge_AP_solid": 0.4088894142862208,
+   "edge_AP_dashed": 0.41443848428755375,
+   "edge_AP_agnostic": 0.41656125282789386,
+   "edge_precision": 0.3009823182711198,
+   "edge_recall": 0.6152610441767068,
+   "n_gt_edges": 1245
   }
  }
 }
