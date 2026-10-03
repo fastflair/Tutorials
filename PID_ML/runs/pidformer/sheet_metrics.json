@@ -1,69 +1,69 @@
 {
  "synthetic": {
-  "node_AP50": 0.9900864362716675,
-  "symbol_mAP50_32cls": 0.9993675947189331,
-  "symbol_mAP50_7cls": 0.9975177645683289,
+  "node_AP50": 0.9900948405265808,
+  "symbol_mAP50_32cls": 0.99927818775177,
+  "symbol_mAP50_7cls": 0.9974563121795654,
   "edge_label_source": {
    "pid2graph_gt": 100
   },
   "relation_head": {
-   "edge_mAP": 0.6334034815834735,
-   "edge_AP_solid": 0.7604478777185878,
-   "edge_AP_dashed": 0.5063590854483592,
-   "edge_AP_agnostic": 0.740647585466156,
-   "edge_precision": 0.13410772375277083,
-   "edge_recall": 0.8763992098579626,
+   "edge_mAP": 0.6596942686199898,
+   "edge_AP_solid": 0.7779660853362776,
+   "edge_AP_dashed": 0.5414224519037021,
+   "edge_AP_agnostic": 0.758013706935944,
+   "edge_precision": 0.1341595137968777,
+   "edge_recall": 0.876258113065563,
    "n_gt_edges": 21262
   },
   "line_trace": {
-   "edge_mAP": 0.8947665925270565,
-   "edge_AP_solid": 0.9491096648333586,
-   "edge_AP_dashed": 0.8404235202207544,
-   "edge_AP_agnostic": 0.9721598664824305,
-   "edge_precision": 0.9235163301792177,
-   "edge_recall": 0.9960963220769448,
+   "edge_mAP": 0.8936897107863332,
+   "edge_AP_solid": 0.9494417842907713,
+   "edge_AP_dashed": 0.8379376372818951,
+   "edge_AP_agnostic": 0.9725175156090361,
+   "edge_precision": 0.9234424728604438,
+   "edge_recall": 0.9961903866052112,
    "n_gt_edges": 21262
   },
   "combined": {
-   "edge_mAP": 0.8909614653707139,
-   "edge_AP_solid": 0.9655818512343385,
-   "edge_AP_dashed": 0.8163410795070893,
-   "edge_AP_agnostic": 0.9859081593439527,
-   "edge_precision": 0.8331630246816538,
-   "edge_recall": 0.9970369673596087,
+   "edge_mAP": 0.8915662946887006,
+   "edge_AP_solid": 0.966308375884412,
+   "edge_AP_dashed": 0.8168242134929893,
+   "edge_AP_agnostic": 0.9866965153585773,
+   "edge_precision": 0.8489485279391148,
+   "edge_recall": 0.9968018060389428,
    "n_gt_edges": 21262
   }
  },
  "real_zenodo": {
-  "node_AP50": 0.816796600818634,
+  "node_AP50": 0.808861255645752,
   "edge_label_source": {
    "line_trace": 16
   },
   "relation_head": {
-   "edge_mAP": 0.1385556472901108,
-   "edge_AP_solid": 0.20871957913080103,
-   "edge_AP_dashed": 0.06839171544942058,
-   "edge_AP_agnostic": 0.23954679320331537,
-   "edge_precision": 0.03212768589928651,
-   "edge_recall": 0.62570281124498,
+   "edge_mAP": 0.2341256364499743,
+   "edge_AP_solid": 0.317171952505111,
+   "edge_AP_dashed": 0.15107932039483762,
+   "edge_AP_agnostic": 0.3217009805592207,
+   "edge_precision": 0.03187561535936987,
+   "edge_recall": 0.6240963855421687,
    "n_gt_edges": 1245
   },
   "line_trace": {
-   "edge_mAP": 0.3687794346826972,
-   "edge_AP_solid": 0.36624337941621443,
-   "edge_AP_dashed": 0.37131548994917996,
-   "edge_AP_agnostic": 0.3775923925654544,
-   "edge_precision": 0.37202380952380953,
-   "edge_recall": 0.6024096385542169,
+   "edge_mAP": 0.3548576827758485,
+   "edge_AP_solid": 0.3359091066215077,
+   "edge_AP_dashed": 0.37380625893018926,
+   "edge_AP_agnostic": 0.355258362704162,
+   "edge_precision": 0.3903345724907063,
+   "edge_recall": 0.5903614457831325,
    "n_gt_edges": 1245
   },
   "combined": {
-   "edge_mAP": 0.41166394928688727,
-   "edge_AP_solid": 0.4088894142862208,
-   "edge_AP_dashed": 0.41443848428755375,
-   "edge_AP_agnostic": 0.41656125282789386,
-   "edge_precision": 0.3009823182711198,
-   "edge_recall": 0.6152610441767068,
+   "edge_mAP": 0.4052299811940965,
+   "edge_AP_solid": 0.3911818533778949,
+   "edge_AP_dashed": 0.419278109010298,
+   "edge_AP_agnostic": 0.4043208405992954,
+   "edge_precision": 0.37475049900199603,
+   "edge_recall": 0.6032128514056225,
    "n_gt_edges": 1245
   }
  }

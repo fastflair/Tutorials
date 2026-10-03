@@ -10,3 +10,4 @@ runs/pidformer/*
 !runs/pidformer/relation_head.pt
 !runs/pidformer/selftrain_r0.pt
 !runs/pidformer/p2g_metrics.json
+!runs/pidformer/real_adapt.pt
