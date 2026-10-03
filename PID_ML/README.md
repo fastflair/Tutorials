@@ -63,6 +63,59 @@ flow direction. Image calls are capped per drawing and cached.
  "safety_functions": [{"tag": "LAHH-101", "linked_tag": "LT-101", "link_basis": "loop_number"}]}
 ```
 
+## Results and recent improvements
+
+Fused edge mAP and node AP@0.5 from the notebook (§9, §9b, §13). OPEN100 "after" numbers are on the 6 held-out plans that were never
+used for training; the other 6 were used for the few-shot adaptation. "Before" is the first published version, scored on all 12 plans
+with no real labels.
+
+| Benchmark | Metric | Before | After |
+|---|---|---|---|
+| PID2Graph Synthetic | Node AP@0.5 | 97.9 % | 97.5 % |
+| | Edge recall | 81.7 % | 91.5 % |
+| | Edge AP (class-agnostic) | 67.0 % | 87.0 % |
+| | Edge mAP | 47.7 % | 75.2 % |
+| | Tanks / pumps found | 155/155, 89/89 | 155/155, 89/89 |
+| OPEN100 (real plans) | Node AP@0.5 | 71.0 % | 91.1 % |
+| | Edge mAP | 14.7 % | 74.3 % |
+| Dataset-P&ID | Edge mAP | 63.4 % | 89.2 % |
+
+What made the difference:
+
+1. **Classical vision for connectivity.** A skeleton line tracer (OpenCV + scikit-image) follows the drawn pipes, classifies junctions by
+   branch geometry (a straight 4-way crossing is not a connection), and bridges dashed lines and gaps at crossings. With correct symbols
+   it reaches 78 % edge mAP on real plans (the earlier tracer: 14 %). The learned relation head now re-ranks the tracer's edges.
+2. **Diagnosis before optimisation.** Most remaining errors came from symbol detection, not line following. A zoomed second detection
+   pass for tiny symbols (flow arrows, small valves) and a rule that stops text next to a symbol being read as a dashed line each gave
+   measurable gains.
+3. **A few real examples beat clever rules.** Fine-tuning with 6 labelled real drawings (`adapt_to_real()`, §8c) raised real-plan edge
+   mAP from 0.46 to 0.74 on unseen plans. Label-free geometry (contours, distance transforms, topology) helped too (0.47 → 0.51), but
+   far less.
+
+### Flow direction: why and how accurate
+
+The benchmark graphs (PID2Graph) are undirected, but engineering reasoning is not. Knowing a valve *connects to* a pump is useful;
+knowing it is *upstream* of the pump is what you need to trace the impact of a failure, plan an isolation, or walk through a HAZOP node.
+Flow direction was therefore added as a new capability (§8d, benchmark in §13):
+
+| Step | Result |
+|---|---|
+| Flow arrows identified by a multimodal LLM on numbered crops (≤ 12 images per drawing, cached) | 99 % of arrows found, 93 % precision (geometry only: 52 % / 55 %) |
+| Arrow direction | 94 % correct on a 72-arrow blind test set (geometry only: 49 %) |
+| Direction propagated along the traced pipes, through valves and fittings | ~75 % of directed connections correct; 85–90 % where all arrows agree (`consistent=True`) |
+| Side effect: confirmed arrows relabelled as `flow_arrow` | real-plan 7-class symbol mAP 0.30 → 0.44 |
+
+The datasets have no direction labels, so direction accuracy is measured against blind visual labels (arrows labelled from crops without
+seeing any method's answer) and a reference walked on the ground-truth pipe graph from those arrows. Connections that arrows claim in
+opposite directions, mostly T-junctions where two branches feed one header, are flagged `consistent=False` rather than hidden.
+
+### Tried and not adopted
+
+Each is documented with its numbers in the notebook: Segment Anything (Meta SAM) box refinement, flip and multi-scale test-time
+augmentation, ensemble voting across passes, OCR-based text suppression, self-similarity template matching, contour input channels for
+the detector, contour junction areas around arrows, and several conflict-resolution rules for flow direction. Several helped synthetic
+drawings while hurting real ones.
+
 ## Lessons learned
 
 Classical computer vision (contours, skeletons, topology) and modern ML/LLMs work best together, and a handful of real labelled
