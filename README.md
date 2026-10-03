@@ -1,6 +1,9 @@
 # Tutorials
 Tutorials regarding technologies
 
+PID_ML:
+  * Digitize P&ID drawings into a connected knowledge graph (equipment, tags, pipe connectivity, flow direction) for context graphs and context engines. Part of the Synthesis Engineering skills series (http://synthesisengineer.ai). See PID_ML/README.md.
+
 Knowledge Graphs:
   * Node2Vec contains examples on how to use Node2Vec to analyze knowledge graphs and utilize the gensim word embeddings on the generated model.
   * The StockInfo directory contains an example of how to build a knowledge graph from stock information and then create a node2vec model.
