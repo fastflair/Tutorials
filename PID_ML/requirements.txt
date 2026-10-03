@@ -19,5 +19,5 @@ networkx>=3.4
 pypdfium2>=4.30           # PDF drawings (section 12)
 jupyter
 # Optional LLM providers for section 12:
-# openai>=1.40            # Azure OpenAI (provider="azure", azure_api="openai")
+# openai>=1.40            # OpenAI (provider="openai", e.g. gpt-6-luna for §8d/§13) or Azure OpenAI (provider="azure", azure_api="openai")
 # boto3>=1.35             # non-Claude Amazon Bedrock models via the Converse API (provider="bedrock")
