@@ -16,8 +16,8 @@
   "llm (dev)": "41/48 = 85% (answered 47)"
  },
  "connections_with_direction": {
-  "geometry": "759 of 2663",
-  "llm": "795 of 2663"
+  "geometry": "1143 of 2663",
+  "llm": "1203 of 2663"
  },
  "symbol_mAP50_7cls": {
   "held-out 6 before": 0.297,
