@@ -17,6 +17,8 @@ easyocr>=1.7
 anthropic>=0.120          # Claude API, Claude on Microsoft Foundry (AnthropicFoundry) and on Amazon Bedrock (AnthropicBedrockMantle)
 networkx>=3.4
 pypdfium2>=4.30           # PDF drawings (section 12)
+transformers>=5.17        # Qwen3.8-Flash-Next vision encoder (section 14; only its 1 GB vision shard is downloaded)
+safetensors>=0.4
 jupyter
 # Optional LLM providers for section 12:
 # openai>=1.40            # OpenAI (provider="openai", e.g. gpt-6-luna for §8d/§13) or Azure OpenAI (provider="azure", azure_api="openai")

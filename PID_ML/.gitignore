@@ -13,3 +13,5 @@ runs/pidformer/*
 !runs/pidformer/real_adapt.pt
 !runs/pidformer/flow_direction_reference.json
 !runs/pidformer/flow_metrics.json
+!runs/pidformer/qwen_refiner.pt
+!runs/pidformer/qwen_metrics.json
