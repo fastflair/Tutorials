@@ -17,9 +17,10 @@ In most companies that knowledge is locked in PDFs and scanned images. This tuto
 - **Engineering semantics**: ISA-5.1 tag decoding; alarms, trips and SIS functions are linked to the transmitters they act on.
 - **Entity types from model internals**: the frozen vision encoder of the open-weight
   [Qwen3.8-Flash-Next](https://huggingface.co/Qwen/Qwen3.8-Flash-Next) re-scores every detection and assigns its entity type (valve,
-  instrument, flow arrow, inlet/outlet, general, tank, pump). This doubled entity-type accuracy on unseen real plans (mAP 0.31 → 0.61).
+  instrument, flow arrow, inlet/outlet, general, tank, pump), which also decides what counts as major equipment. This more than doubled
+  entity-type accuracy on unseen real plans (mAP 0.31 → 0.70).
 - **Real-world accuracy**: fine-tuning on just 6 labelled real drawings raised connection mAP from 0.46 to 0.74 on unseen plans
-  (0.77 with the Qwen refiner).
+  (0.76 with the Qwen refiner).
 
 ## Why it matters for context graphs and context engines
 
@@ -79,15 +80,15 @@ adaptation. "Before" is the first published version, scored on all 12 plans with
 
 | Benchmark | Metric | Before | After | + Qwen refiner (§14) |
 |---|---|---|---|---|
-| PID2Graph Synthetic | Node AP@0.5 | 97.9 % | 97.5 % | **98.8 %** |
-| | Entity type (7-class mAP) | 22.9 % | 7.6 % | **95.2 %** |
-| | Edge recall | 81.7 % | 91.5 % | 91.3 % |
-| | Edge AP (class-agnostic) | 67.0 % | 87.0 % | 87.4 % |
-| | Edge mAP | 47.7 % | 75.2 % | 75.3 % |
+| PID2Graph Synthetic | Node AP@0.5 | 97.9 % | 97.5 % | **98.9 %** |
+| | Entity type (7-class mAP) | 22.9 % | 7.6 % | **97.5 %** |
+| | Edge recall | 81.7 % | 91.5 % | **92.7 %** |
+| | Edge AP (class-agnostic) | 67.0 % | 87.0 % | **89.6 %** |
+| | Edge mAP | 47.7 % | 75.2 % | **76.8 %** |
 | | Tanks / pumps found | 155/155, 89/89 | 155/155, 89/89 | 155/155, 89/89 |
-| OPEN100 (real plans) | Node AP@0.5 | 71.0 % | 91.1 % | **93.2 %** |
-| | Entity type (7-class mAP) | 37.3 % | 31.0 % | **61.3 %** |
-| | Edge mAP | 14.7 % | 74.3 % | **76.8 %** |
+| OPEN100 (real plans) | Node AP@0.5 | 71.0 % | 91.1 % | **93.9 %** |
+| | Entity type (7-class mAP) | 37.3 % | 31.0 % | **70.4 %** |
+| | Edge mAP | 14.7 % | 74.3 % | **76.4 %** |
 | Dataset-P&ID | Edge mAP | 63.4 % | 89.2 % | – (symbols already ~100 %) |
 
 What made the difference:
@@ -101,9 +102,10 @@ What made the difference:
 3. **A few real examples beat clever rules.** Fine-tuning with 6 labelled real drawings (`adapt_to_real()`, §8c) raised real-plan edge
    mAP from 0.46 to 0.74 on unseen plans. Label-free geometry (contours, distance transforms, topology) helped too (0.47 → 0.51), but
    far less.
-4. **Model internals as features.** A frozen vision-language encoder knows what drawn symbols look like. Its hidden states, read at a
-   resolution where every symbol spans ~3 visual tokens, feed a 5 M-parameter head that re-scores each detection and names its entity
-   type (§14). Entity-type mAP on unseen real plans doubled (0.31 → 0.61) and edge mAP rose 0.74 → 0.77.
+4. **Model internals as features.** A frozen vision-language encoder knows what drawn symbols look like. Its block-19 hidden states,
+   read at a resolution where every symbol spans ~3 visual tokens, feed a 0.9 M-parameter head that re-scores each detection and names its
+   entity type (§14). That type now also decides which large-equipment candidates are tanks, pumps or inlet/outlet connectors.
+   Entity-type mAP on unseen real plans rose 0.31 → 0.70 and edge mAP 0.74 → 0.76.
 
 ### Flow direction: why and how accurate
 
@@ -133,15 +135,26 @@ for every drawing.
   quantization was not needed.
 - **Resolution first.** One merged visual token covers 32×32 px, so a small arrow on a full sheet would vanish. Every candidate is cropped
   and resampled so the symbol spans ~100 px (about 3×3 merged tokens), whatever its size on the sheet.
-- **The refiner.** It combines symbol-region features from six pre-merge vision layers (stroke-level to semantic) and the merged 2,560-d
-  tokens with detector cues. It predicts *is this a real symbol?* and *which entity type?* (valve, instrument, flow arrow, inlet/outlet,
-  general, tank, pump), and each item's `type_confidence` is exported for review. It plugs into `digitize(..., refiner=QWEN_REFINER)`.
+- **The refiner.** It combines the symbol-region features of vision block 19 (the encoder stops there) with detector cues, and is trained
+  on all four 90° rotations of each symbol. It predicts *is this a real symbol?* and *which entity type?* (valve, instrument, flow arrow,
+  inlet/outlet, general, tank, pump), and each item's `type_confidence` is exported for review. It plugs into
+  `digitize(..., refiner=QWEN_REFINER)`.
+- **Equipment arbitration.** The large-equipment finder used to turn every big detection into a tank: on real plans it relabelled half of
+  the inlet/outlet connectors and invented ~50 tanks. The refined entity type now decides each candidate.
 - **Protocol.** Settings were chosen on a 2-fold swap of the 12 real OPEN100 plans; the held-out plans were scored once, at the end.
   Training candidates are out-of-sample (each plan recorded with the detector that never saw it).
 
 | Idea from model internals | Result | Adopted |
 |---|---|---|
-| Multi-layer pre-merge features + merged tokens → rescoring + entity type | real-plan entity mAP 0.31 → 0.61, node AP 0.91 → 0.93, edge mAP 0.74 → 0.77; synthetic entity mAP 0.08 → 0.95; +0.6 s per drawing | ✓ |
+| Block-19 features + rotation augmentation → rescoring + entity type, which also arbitrates the equipment finder | real-plan entity mAP 0.31 → 0.70, node AP 0.91 → 0.94, edge mAP 0.74 → 0.76; synthetic entity mAP 0.08 → 0.98, edge mAP 0.75 → 0.77; +0.4 s per drawing | ✓ |
+| First version: six layers (blocks 4–26) + merged tokens, no arbitration | real-plan entity mAP 0.61, node AP 0.93, edge mAP 0.77; synthetic entity mAP 0.95 | replaced |
+| Equipment arbitration alone (first version's features, selection fold) | entity mAP 0.79 → 0.93, edge mAP 0.81 → 0.82 | ✓ |
+| Layer study: each of the 27 blocks, top 3 / 4 / 6 blocks, all 27, learned scalar mix, ± merged tokens | block 19 alone is best (proxy 0.938 vs 0.927); the last block alone is worst of the deep ones (0.88, one outlier channel dominates its statistics) | block 19 ✓ |
+| "Significant features": ANOVA top-256…4,096 channels, per-channel z-scoring | 0.90–0.92, never better than the full layer | ✗ |
+| Other pooling (max, learned attention) and sites (MLP hidden activations, attention outputs, whole crop) | 0.90–0.93, not better | ✗ |
+| Rotation test-time averaging; tighter or higher-resolution crops; bigger head / longer training | equal or lower | ✗ (rotation *training* augmentation ✓) |
+| Topological data analysis: persistent homology of each symbol crop (GUDHI cubical complexes) | helps a head without image features (0.71 → 0.75), hurts with Qwen features (0.93 → 0.79–0.88) | ✗ |
+| Edge verifier: Qwen features of a crop spanning both symbols, TDA connection persistence, cue recalibration | best on the selection fold (0.79 → 0.82), not on held-out plans (0.768 → 0.722–0.765) | ✗ |
 | Same head without image features (control) | most of the real-plan gain disappears (proxy 7-class 0.60 vs 0.73) | – |
 | Page-style embedding + FiLM conditioning | hurt the selection fold (7-class 0.93 → 0.88) | ✗ |
 | LoRA adapters on vision blocks 20–26 + merger | best candidate-level scores, but in the full pipeline entity mAP 0.73 vs 0.79 on the selection fold | ✗ |
@@ -155,14 +168,16 @@ for every drawing.
 Each is documented with its numbers in the notebook: Segment Anything (Meta SAM) box refinement, flip and multi-scale test-time
 augmentation, ensemble voting across passes, OCR-based text suppression, self-similarity template matching, contour input channels for
 the detector, contour junction areas around arrows, and several conflict-resolution rules for flow direction. From §14: page-style FiLM
-conditioning, LoRA adapters on the Qwen vision encoder, gradient embeddings, query-by-example and dense backbone fusion. Several helped
-synthetic drawings or candidate-level scores while not helping real drawings end to end.
+conditioning, LoRA adapters on the Qwen vision encoder, gradient embeddings, query-by-example, dense backbone fusion, multi-layer / top-k /
+selected-channel features, other pooling and encoder sites, persistent-homology (TDA) features for symbols and connections, and an edge
+verifier. Several helped synthetic drawings or candidate-level scores while not helping real drawings end to end.
 
 ## Lessons learned
 
 Classical computer vision (contours, skeletons, topology) and modern ML/LLMs work best together, and a handful of real labelled
 examples beats clever rules. The internals of a large vision-language model are useful features, but only after the resolution problem
-is solved, and simple frozen features beat heavier adaptation when real labels are scarce. Every experiment, including the ideas that did
+is solved, and simple frozen features beat heavier adaptation when real labels are scarce. Score the *pipeline* per class, not only
+the model: twice a better model looked worse end to end because a later rule overrode its decisions. Every experiment, including the ideas that did
 not work, is documented with its numbers in the notebook (§9c–§9f, §13, §14).
 
 ## Links
